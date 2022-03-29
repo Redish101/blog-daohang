@@ -15,13 +15,7 @@ function func_run_docker() {
 }
 
 
-function func_help() {
-    echo "$0 zhblogs 开发环境"
-    echo "    pull      拉取镜像到本地"
-    echo "    install   安装依赖到本地"
-    echo "    dev       进入开发模式"
-    echo "    build     构建生产环境镜像"
-}
+
 
 function func_build_image() {
     if [[ "$(git status | grep 'nothing to commit' | wc -l)" -eq "1" ]]; then
@@ -29,9 +23,29 @@ function func_build_image() {
         echo $Commit
         docker build -t ${ZhBlogsImage}:${Commit} .
         echo "镜像: ${ZhBlogsImage}:${Commit}"
+
+        backendLatest="$(echo $backendImage | cut -d ":" -f 1):latest"
+        
     else
         echo "存在未提交的更改，请提交后再构建镜像"
     fi
+}
+
+function func_push_image() {
+    Commit=$(git rev-parse --short HEAD)
+    echo "最新版本: ${Commit}"
+    docker tag ${ZhBlogsImage}:${Commit} ${ZhBlogsImage}:latest
+    docker push ${ZhBlogsImage}:${Commit}
+    docker push ${ZhBlogsImage}:latest
+}
+
+function func_help() {
+    echo "$0 zhblogs 开发环境"
+    echo "    pull      拉取镜像到本地"
+    echo "    install   安装依赖到本地"
+    echo "    dev       进入开发模式"
+    echo "    build     构建生产环境镜像"
+    echo "    push      推送镜像"
 }
 
 if [ $# -eq "0" ]; then
@@ -42,6 +56,7 @@ else
         "install")  func_run_docker yarn install --frozen-lockfile;;
         "dev")      func_run_docker yarn dev;;
         "build")    func_build_image;;
+        "push")     func_push_image;;
         
         *)          func_help    ;;
     esac
