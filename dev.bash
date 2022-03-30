@@ -44,6 +44,7 @@ function func_help() {
     echo "    pull      拉取镜像到本地"
     echo "    install   安装依赖到本地"
     echo "    dev       进入开发模式"
+    echo "    test      执行测试"
     echo "    build     构建生产环境镜像"
     echo "    push      推送镜像"
 }
@@ -55,6 +56,7 @@ else
         "pull")     docker pull ${BaseImage};;
         "install")  func_run_docker yarn install --frozen-lockfile;;
         "dev")      func_run_docker yarn dev;;
+        "test")     func_run_docker yarn mocha;;
         "build")    func_build_image;;
         "push")     func_push_image;;
         
