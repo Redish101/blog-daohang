@@ -14,7 +14,7 @@ export declare type LoadingProps = Combine<
  * @param loading boolean 是否为加载状态
  */
 export function Loading(props: LoadingProps) {
-  const { loading = false, style, ...restProps } = props;
+  const { loading = true, style, ...restProps } = props;
   return (
     <Spin
       spinning={loading}

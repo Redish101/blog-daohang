@@ -56,6 +56,26 @@ async function getBlogCount(params: { search: string, tags: string[] }): Promise
     })
 }
 
+/**
+ * 获取标签列表
+ * @returns 标签列表
+ */
+async function getTags(params: {}): Promise<Result<string[]>> {
+    return new Promise(async (resolve) => {
+        const result = await getBlogs({});
+        var set = new Set<string>();
+        for (const blog of blogs) {
+            for (const tag of blog.tags) {
+                set.add(tag);
+            }
+        }
+        resolve({
+            success: true,
+            data: Array.from(set),
+        })
+    })
+}
+
 
 /**
  * 获取博客数据
@@ -66,12 +86,11 @@ async function getBlogCount(params: { search: string, tags: string[] }): Promise
  * @returns 博客数据
  */
 async function getBlogs(params: { search?: string, tags?: string[], offset?: number, size?: number }): Promise<Result<Blog[]>> {
-
     return new Promise((resolve) => {
         var { search, tags, offset, size } = params
         var ret = [...blogs];
-        if (!!search) ret.filter(blog => blog.name.toLowerCase().indexOf(search as string) !== -1 || blog.url.toLowerCase().indexOf(search as string) !== -1);
-        if (!!tags && tags.length > 0) ret.filter(blog => tags?.filter((tag) => blog.tags.indexOf(tag) != -1).length === tags?.length);
+        if (!!search) ret = ret.filter(blog => blog.name.toLowerCase().indexOf(search as string) !== -1 || blog.url.toLowerCase().indexOf(search as string) !== -1);
+        if (!!tags && tags.length > 0) ret = ret.filter(blog => tags?.filter((tag) => blog.tags.indexOf(tag) != -1).length === tags?.length);
         if (typeof offset === "number") ret = ret.slice(offset)
         if (typeof size === 'number' && size > 0) ret = ret.slice(0, size);
         resolve({
@@ -116,4 +135,5 @@ export default exports = {
     updateBlogs,
     addBlogs,
     deleteBlogs,
+    getTags,
 }

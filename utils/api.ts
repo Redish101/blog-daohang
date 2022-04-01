@@ -1,5 +1,6 @@
+import { shouldString } from ".";
 import { isDevelopment } from "./env";
-import { Result, Blog } from "./types";
+import { Result, Blog, JSON } from "./types";
 
 const backendURL = isDevelopment() ? "http://localhost:3000" : "";
 const apiPrefix = "/api/"
@@ -47,7 +48,11 @@ export function makeQuery(query: { [key: string]: number | string | string[] }):
     }).join('&') : '';
 }
 
-export async function sendRequest<T, U>(method: "get" | "post" | "put" | "delete", path: string, params: Partial<T>): Promise<Result<U>> {
+export async function sendRequest<T extends JSON, U>(method: "get" | "post" | "put" | "delete", path: string, params: Partial<T>): Promise<Result<U>> {
+    params = Object.keys(params).reduce((pre, cur) => ({
+        ...pre,
+        [cur]: !!params[cur] && Array.isArray(params[cur]) ? (params[cur] as string[]).map((item: string) => shouldString(item)).join(",") : params[cur]
+    }), {});
     ({ path, params } = replaceParams(path, params));
     if (method === "get") {
         path = `${path}?${makeQuery(params as unknown as { [key: string]: number | string })}`;
@@ -75,8 +80,17 @@ export async function sendRequest<T, U>(method: "get" | "post" | "put" | "delete
  * @returns 博客总数
  */
 export async function getBlogCount(params: { search?: string, tags?: string[] }): Promise<Result<number>> {
-    return await sendRequest("get", "/blogs/count", {});
+    return await sendRequest("get", "/blogs/count", params);
 }
+
+/**
+ * 获取博客标签
+ * @returns 标签列表
+ */
+export async function getTags(params: {}): Promise<Result<string[]>> {
+    return await sendRequest("get", "/tags", params);
+}
+
 
 
 /**

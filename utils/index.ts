@@ -55,6 +55,18 @@ export function shouldArray<T>(value: T[] | T): T[] {
 }
 
 /**
+ * 转换 @value 为数组（使用 @sep 分割
+ * @param value 值
+ */
+export function shouldArraySplit(value: string | string[] | undefined, sep: string = ","): string[] {
+    if (!value) return []
+    if (Array.isArray(value)) return value;
+    const v = shouldString(value)
+    if (!!v) return v.split(sep)
+    return []
+}
+
+/**
  * 转换 @value 为 number 类型
  * @param value 值
  * @param defaultValue 默认值
@@ -102,24 +114,82 @@ export function promiselized<T extends (...arg: any) => any>(callback: T): (...a
     return (...args: any) => new Promise((resolve) => { resolve(callback(...args)) });
 }
 
+
+
+
+
+/**
+ * React Hook 带回调的 useState
+ * @param defaultState 默认路由参数
+ */
+function useStateCallback<T>(defaultState: T) {
+    const [state, setState] = React.useState(defaultState);
+    const cbRef = React.useRef<TypeStateCallback<T>>(() => { });
+
+    const setStateCallback = React.useCallback((state: T, callback?: TypeStateCallback<T>) => {
+        if (!!callback) cbRef.current = callback;
+        else cbRef.current = () => { };
+
+        setState(state);
+
+    }, []);
+
+    React.useEffect(() => {
+        if (!!cbRef.current) {
+            cbRef.current(state);
+            cbRef.current = () => { };
+        }
+    }, [state]);
+
+    return [state, setStateCallback] as [T, SetStateCallbackAction<T>];
+}
+export declare type TypeStateCallback<T> = (state?: T) => void
+export declare type SetStateCallbackAction<T> = (state: T, callback?: TypeStateCallback<T>) => void
+
+
+
 /**
  * React Hook 绑定路由参数
  * @param defaultState 默认路由参数
  */
-export function useQuery(defaultState?: { [key: string]: string | string[] }) {
-    const [state, setState] = React.useState({ ...defaultState })
+export function useQuery(defaultState?: TypeQuery) {
+    const [query, setQuery] = useStateCallback(defaultState || {});
+    const callbackRef = React.useRef<SetStateCallbackAction<TypeQuery>>(() => { });
+
+    const setQueryCallback = React.useCallback((newQuery: TypeQuery, callback?: SetStateCallbackAction<TypeQuery>) => {
+        var url = new URL(window.location.href)
+
+        var hrefQuery: { [key: string]: string } = {}
+        url.searchParams.forEach((value, key) => {
+            hrefQuery[key] = value
+        })
+
+        const afterUpdate = {
+            ...hrefQuery,
+            ...query,
+            ...newQuery,
+        }
+        if (!isEqual(query, afterUpdate)) {
+            setQuery(afterUpdate)
+            url.search = makeQuery(afterUpdate)
+            history.replaceState('', '', url.toString())
+        }
+
+        if (!!callback) callbackRef.current = callback;
+        else callbackRef.current = () => { };
+    }, [query, setQuery, callbackRef])
 
     React.useEffect(() => {
-        var url = new URL(window.location.href)
-        url.search = makeQuery(state)
-        history.replaceState('', '', url.toString())
-    }, [state])
+        if (!!callbackRef.current) callbackRef.current(query)
+        callbackRef.current = () => { };
+    }, [query])
 
-    return [state, setState] as [
-        { [key: string]: string | string[]; },
-        React.Dispatch<React.SetStateAction<{ [key: string]: string | string[]; }>>
+    return [query, setQueryCallback] as [
+        TypeQuery,
+        SetStateCallbackAction<TypeQuery>
     ]
 }
+declare type TypeQuery = { [key: string]: string | string[] };
 
 /**
  * 判断两个变量是否相同
@@ -141,3 +211,23 @@ export function isEqual(a: any, b: any) {
     }
     return false;
 }
+
+
+
+/**
+ * 防抖，停止调用 ms 毫秒后才执行 callback
+ * @param callback 回调函数
+ * @param ms 毫秒
+ * @param key 唯一标识
+ */
+export function waitDone(callback: () => void, ms: number, key: string) {
+    const id = (waitMap[key] || 0) + 1;
+    waitMap[key] = id;
+    setTimeout(() => {
+        if (id === waitMap[key]) {
+            callback();
+            delete waitMap[key];
+        }
+    }, ms);
+}
+const waitMap: { [key: string | number]: number } = {}

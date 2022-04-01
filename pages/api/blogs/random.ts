@@ -1,4 +1,4 @@
-import { shouldString, shouldArray, shouldNotUndefined, shouldNumber } from '@/utils'
+import { shouldString, shouldArraySplit, shouldNumber } from '@/utils'
 import { getRandomBlogs } from '@/utils/api'
 import wrapper from '@/utils/backend/api'
 
@@ -9,7 +9,7 @@ export default wrapper<typeof getRandomBlogs>(
         if (req.method === 'GET') {
             const result = await DB.getBlogs({
                 search: shouldString(args.search, ""),
-                tags: shouldArray(shouldNotUndefined(args.tags, [])),
+                tags: shouldArraySplit(args.tags),
             })
             if (!!result.success && !!result.data) {
                 var arr = result.data;

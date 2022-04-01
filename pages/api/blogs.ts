@@ -1,4 +1,4 @@
-import { Result, Blog, shouldNumber, shouldString, shouldArray, shouldNotUndefined } from '@/utils'
+import { Result, Blog, shouldNumber, shouldString, shouldArraySplit } from '@/utils'
 import { getBlogs } from '@/utils/api'
 import wrapper from '@/utils/backend/api'
 
@@ -9,7 +9,7 @@ export default wrapper<typeof getBlogs>(
         if (req.method === 'GET') {
             return await DB.getBlogs({
                 search: shouldString(args.search, ""),
-                tags: shouldArray(shouldNotUndefined(args.tags, [])),
+                tags: shouldArraySplit(args.tags),
                 offset: shouldNumber(args.offset, 0),
                 size: shouldNumber(args.size, -1),
             })

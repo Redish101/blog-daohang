@@ -12,18 +12,6 @@ export default class MyDocument extends Document {
           <meta httpEquiv='Cache-Control' content='no-transform' />
 
           <link rel='canonical' href='https://zhblogs.ohyee.cc/' />
-
-          {/* <link href='/boot.css' rel='stylesheet' type='text/css' />
-          <link href='/homepage.css' rel='stylesheet' type='text/css' /> */}
-
-          <script
-            type='text/javascript'
-            src='/boot.js'
-            async
-            charSet='UTF-8'
-          ></script>
-
-          {/* <title>中文博客列表导航-尝试链接几乎所有的中文博客</title> */}
         </Head>
         <body>
           <Main />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Table, TableColumnsType, Button } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
 
 import { Blog, showNotification } from '@/utils';
 import { Flex } from '@/components/flex';
@@ -53,6 +54,7 @@ export function RandomBlogs() {
   return (
     <Flex direction='TB' fullWidth>
       <Button
+        icon={<TeamOutlined />}
         loading={loading}
         onClick={() => {
           get10();

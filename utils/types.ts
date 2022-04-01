@@ -32,3 +32,5 @@ type DefaultProps = {
  * 组件基础类
  */
 export declare type ComponentProps<T> = Combine<T, DefaultProps>;
+
+export declare type JSON = { [key: string]: string | number | boolean | JSON | string[] | number[] | boolean[] | JSON[] }
