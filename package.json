@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "antd": "^4.19.3",
+    "js-cookie": "^3.0.1",
     "nedb": "^1.8.0",
     "next": "12.1.2",
     "react": "17.0.2",
@@ -20,7 +21,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/cookie": "^0.4.1",
+    "@types/js-cookie": "^3.0.1",
     "@types/nedb": "^1.8.12",
     "@types/node": "17.0.23",
     "@types/react": "17.0.43",

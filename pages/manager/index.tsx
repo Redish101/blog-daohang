@@ -7,6 +7,7 @@ import { UserInfo, Blog, showNotification, shouldString, shouldNumber, getDomain
 import { Tag }from'@/components/tag';
 import { Flex } from '@/components/flex';
 import styles from './index.module.scss';
+import Cookie from 'js-cookie';
 
 export default function Manager() {
   const [token, setToken] = React.useState("");
@@ -15,22 +16,22 @@ export default function Manager() {
     
   React.useEffect(() => {
     setLoading(true);
-    if (!!window){
-      (window as any).cookieStore.get("token").then((tokenObj?: {value:string}) => {
-        const token = !!tokenObj?tokenObj.value:"";
-        getUserInfo({ token: token }).then((resp) => { 
-          if (!!resp.success && !!resp.data) {
-            setToken(token);
-            setInfo(resp.data);
-          } else {
-            setToken("");
-          }
-        });
-      
-      }).finally(() => {
-        setLoading(false);
+    const token = Cookie.get("token");
+    if (!!token) {
+      getUserInfo({ token: token }).then((resp) => { 
+        if (!!resp.success && !!resp.data) {
+          setToken(token);
+          setInfo(resp.data);
+        } else {
+          setToken("");
+        }
       });
+    } else {
+      setToken("");
     }
+    
+      
+    setLoading(false);
   }, [setToken]);
   
   return <Card shadow>
@@ -51,7 +52,8 @@ function Login() {
     ]}
     onFinish={(values) => { 
       const token = values.token;
-      (window as any).cookieStore.set("token", token);
+      Cookie.set("token", token);
+     
       location.reload();
     }}
   />;
