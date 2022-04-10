@@ -8,12 +8,14 @@ export class Database {
   tags: string[] = [];
 
   constructor(path: string) {
+    console.log("初始化数据库");
     this.path = path;
     this.read();
   }
 
   async read() {
     try {
+      console.log("[数据库] 开始读入");
       const _blogs = JSON.parse((await fs.readFileSync(this.path)).toString("utf8"));
       var set: { [key: string]: number | undefined } = {};
       var tagSet = new Set<string>();
@@ -56,7 +58,7 @@ export class Database {
       this.blogs = blogs;
       this.tags = Array.from(tagSet);
 
-      console.log(`[Database] read ${this.blogs.length} blogs, ${this.tags.length} tags`);
+      console.log(`[数据库] 读入 ${this.blogs.length} 篇文章, ${this.tags.length} 个标签`);
     } catch (error) {
       console.error(error);
       throw (error);
@@ -66,7 +68,7 @@ export class Database {
   async write() {
     try {
       await fs.writeFileSync(this.path, JSON.stringify(this.blogs, undefined, 2));
-      console.log("[Database] write blogs");
+      console.log("[数据库] 写出至文件");
       await this.read();
     } catch (error) {
       console.error(error);

@@ -24,7 +24,7 @@ import { Blog, getDomain, shouldString } from '../utils';
       feed: shouldString(blog.feed, ""),
       status: `${blog.status}`,
       repeat: false,
-      enabled: !!blog.enabled
+      enabled: typeof blog.enabled ==='undefined' ? true:!!blog.enabled
     };
 
     for (const tag of curBlog.tags) {
@@ -46,4 +46,5 @@ import { Blog, getDomain, shouldString } from '../utils';
   }
     
   await fs.writeFileSync(dataPath, JSON.stringify(blogs, undefined, 2));
+  console.log("write", blogs.length, "files");
 })();

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
-    "transfer": "ts-node ./tools/transfer"
+    "transfer": "node -r ts-node/register ./tools/transfer"
   },
   "dependencies": {
     "antd": "^4.19.3",
