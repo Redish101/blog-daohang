@@ -5,12 +5,10 @@ import { PageHeader, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import { Tabs, Tab, Card } from "@/components/antd";
-import { Flex } from "@/components/flex";
 
-import { RandomBlogs } from "./index/random";
-import { AboutTab } from "./index/about";
-import { Blogs } from "./index/blogs";
-import { Cornor } from "./index/corner";
+import { RandomBlogs } from "@/components/index/random";
+import { AboutTab } from "@/components/index/about";
+import { Blogs } from "@/components/index/blogs";
 import { useQuery, shouldString } from "@/utils";
 import Link from "next/link";
 
