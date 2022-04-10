@@ -1,4 +1,4 @@
-import { Tag as AntdTag } from 'antd';
+import { Tag as AntdTag } from "antd";
 
 export declare type TagProps = {
   tag: string;
@@ -7,17 +7,17 @@ export declare type TagProps = {
 };
 
 const colorArrs = [
-  'magenta',
-  'red',
-  'volcano',
-  'orange',
-  'gold',
-  'lime',
-  'green',
-  'cyan',
-  'blue',
-  'geekblue',
-  'purple',
+  "magenta",
+  "red",
+  "volcano",
+  "orange",
+  "gold",
+  "lime",
+  "green",
+  "cyan",
+  "blue",
+  "geekblue",
+  "purple",
 ];
 
 export function getColor(id: string) {
@@ -37,13 +37,17 @@ export function Tag(props: TagProps) {
     <AntdTag
       color={getColor(tag)}
       onClick={() => {
-        if (!!onClick) onClick(tag);
+        if (!!onClick) {
+          onClick(tag);
+        }
       }}
       onClose={() => {
-        if (!!onClose) onClose(tag);
+        if (!!onClose) {
+          onClose(tag);
+        }
       }}
       closable={!!onClose}
-      style={{ cursor: !!onClick ? 'pointer' : 'unset' }}
+      style={{ cursor: !!onClick ? "pointer" : "unset" }}
     >
       {tag}
     </AntdTag>

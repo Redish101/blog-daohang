@@ -1,28 +1,28 @@
-import React from 'react';
-import { Table, TableColumnsType, Button } from 'antd';
-import { TeamOutlined } from '@ant-design/icons';
+import React from "react";
+import { Table, TableColumnsType, Button } from "antd";
+import { TeamOutlined } from "@ant-design/icons";
 
-import { Blog, showNotification } from '@/utils';
-import { Flex } from '@/components/flex';
-import { getRandomBlogs } from '@/utils/api';
+import { Blog, showNotification } from "@/utils";
+import { Flex } from "@/components/flex";
+import { getRandomBlogs } from "@/utils/api";
 
 const cols: TableColumnsType<Blog> = [
   {
-    title: '标题',
-    dataIndex: 'name',
-    key: 'name',
+    title: "标题",
+    dataIndex: "name",
+    key: "name",
   },
   {
-    title: '链接',
-    dataIndex: 'url',
-    key: 'url',
+    title: "链接",
+    dataIndex: "url",
+    key: "url",
     render: (url) => (
       <a
         href={url}
-        hrefLang='zh'
-        target='_blank'
-        type='text/html'
-        rel='noreferrer'
+        hrefLang="zh"
+        target="_blank"
+        type="text/html"
+        rel="noreferrer"
       >
         {url}
       </a>
@@ -52,7 +52,7 @@ export function RandomBlogs() {
   }, [get10]);
 
   return (
-    <Flex direction='TB' fullWidth>
+    <Flex direction="TB" fullWidth>
       <Button
         icon={<TeamOutlined />}
         loading={loading}
@@ -63,7 +63,7 @@ export function RandomBlogs() {
         再来十个
       </Button>
       <Table<Blog>
-        rowKey='url'
+        rowKey="url"
         columns={cols}
         dataSource={blogs}
         loading={loading}

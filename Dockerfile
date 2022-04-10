@@ -35,4 +35,6 @@ EXPOSE 3000
 
 ENV PORT 3000
 
+VOLUME [ "/data/db" ]
+
 CMD ["yarn", "start"]

@@ -3,7 +3,7 @@
  * @returns 是否为服务端
  */
 export function isServer(): boolean {
-    return typeof window === 'undefined'
+  return typeof window === "undefined";
 }
 
 /**
@@ -11,5 +11,5 @@ export function isServer(): boolean {
  * @returns 是否为开发环境
  */
 export function isDevelopment(): boolean {
-    return process.env.NODE_ENV === 'development'
+  return process.env.NODE_ENV === "development";
 }

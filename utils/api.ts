@@ -1,9 +1,9 @@
 import { shouldString } from ".";
 import { isDevelopment } from "./env";
-import { Result, Blog, JSON } from "./types";
+import { Result, Blog, JSONObject, UserInfo } from "./types";
 
 const backendURL = isDevelopment() ? "http://localhost:3000" : "";
-const apiPrefix = "/api/"
+const apiPrefix = "/api/";
 const apiPath = backendURL.replace(/\/*$/g, "") + apiPrefix;
 
 /**
@@ -12,26 +12,27 @@ const apiPath = backendURL.replace(/\/*$/g, "") + apiPrefix;
  * @returns 返回替换后的 path 及剩余的参数
  */
 export function replaceParams<T extends { [key: string]: any }>(path: string, params: T): { path: string, params: Partial<T> } {
-    var finalPath = path;
-    var p = { ...params };
+  var finalPath = path;
+  var p = { ...params };
 
-    if (!!params) {
-        Object.keys(params).map(key => {
-            if (params[key] === undefined || params[key] === null) {
-                delete p[key]
-            } else {
-                const varKey = `:${key}`;
-                if (finalPath.indexOf(varKey) !== -1) {
-                    finalPath = finalPath.replace(`:${key}`, params[key]);
-                    delete p[key];
-                }
-            }
-        })
-    }
-    return {
-        path: finalPath,
-        params: p,
-    }
+  if (!!params) {
+    Object.keys(params).map((key) => {
+      if (params[key] === undefined || params[key] === null) {
+        delete p[key];
+      } else {
+        const varKey = `:${key}`;
+        if (finalPath.indexOf(varKey) !== -1) {
+          finalPath = finalPath.replace(`:${key}`, params[key]);
+          delete p[key];
+        }
+      }
+    });
+  }
+  
+  return {
+    path: finalPath,
+    params: p,
+  };
 }
 
 /**
@@ -39,38 +40,44 @@ export function replaceParams<T extends { [key: string]: any }>(path: string, pa
  * @param params 参数
  * @return 返回生成的 Query 字段
  */
-export function makeQuery(query: { [key: string]: number | string | string[] }): string {
-    return !!query ? Object.keys(query).map(key => {
-        const k = encodeURIComponent(key)
-        const value = query[key];
-        const v = encodeURIComponent(Array.isArray(value) ? value.join(",") : value)
-        return `${k}=${v}`
-    }).join('&') : '';
+export function makeQuery(query: { [key: string]: number | string | string[]|undefined }): string {
+  return !!query ? Object.keys(query).map((key) => {
+    const k = encodeURIComponent(key);
+    const value = query[key];
+    if (typeof value === "undefined") {
+      return "";
+    };
+    const v = encodeURIComponent(Array.isArray(value) ? value.join(",") : value);
+    
+    return `${k}=${v}`;
+  }).join("&") : "";
 }
 
-export async function sendRequest<T extends JSON, U>(method: "get" | "post" | "put" | "delete", path: string, params: Partial<T>): Promise<Result<U>> {
-    params = Object.keys(params).reduce((pre, cur) => ({
-        ...pre,
-        [cur]: !!params[cur] && Array.isArray(params[cur]) ? (params[cur] as string[]).map((item: string) => shouldString(item)).join(",") : params[cur]
-    }), {});
-    ({ path, params } = replaceParams(path, params));
-    if (method === "get") {
-        path = `${path}?${makeQuery(params as unknown as { [key: string]: number | string })}`;
-    }
-    try {
-        console.log(`${apiPath.replace(/\/*$/g, "")}/${path.replace(/^\/*/g, "")}`)
-        const resp = await fetch(`${apiPath.replace(/\/*$/g, "")}/${path.replace(/^\/*/g, "")}`, {
-            method,
-            body: method !== "get" ? JSON.stringify(params) : undefined,
-        })
-        const result: Result<U> = await resp.json()
-        return result
-    } catch (err: any) {
-        return {
-            success: false,
-            message: err.message,
-        }
-    }
+export async function sendRequest<T extends JSONObject, U>(method: "get" | "post" | "put" | "delete", path: string, params: Partial<T>): Promise<Result<U>> {
+  params = Object.keys(params).reduce((pre, cur) => ({
+    ...pre,
+    [cur]: !!params[cur] && Array.isArray(params[cur]) ? (params[cur] as string[]).map((item: string) => shouldString(item)).join(",") : params[cur]
+  }), {});
+  ({ path, params } = replaceParams(path, params));
+  console.log(params);
+  if (method === "get") {
+    path = `${path}?${makeQuery(params as unknown as { [key: string]: number | string })}`;
+  }
+  try {
+    console.log(`${apiPath.replace(/\/*$/g, "")}/${path.replace(/^\/*/g, "")}`);
+    const resp = await fetch(`${apiPath.replace(/\/*$/g, "")}/${path.replace(/^\/*/g, "")}`, {
+      method,
+      body: method !== "get" ? JSON.stringify(params) : undefined,
+    });
+    const result: Result<U> = await resp.json();
+    
+    return result;
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err.message,
+    };
+  }
 
 }
 
@@ -79,8 +86,8 @@ export async function sendRequest<T extends JSON, U>(method: "get" | "post" | "p
  * 获取博客总数
  * @returns 博客总数
  */
-export async function getBlogCount(params: { search?: string, tags?: string[] }): Promise<Result<number>> {
-    return await sendRequest("get", "/blogs/count", params);
+export async function getBlogCount(params: { search?: string, tags?: string[], all?:boolean }): Promise<Result<number>> {
+  return await sendRequest("get", "/blogs/count", params);
 }
 
 /**
@@ -88,9 +95,8 @@ export async function getBlogCount(params: { search?: string, tags?: string[] })
  * @returns 标签列表
  */
 export async function getTags(params: {}): Promise<Result<string[]>> {
-    return await sendRequest("get", "/tags", params);
+  return await sendRequest("get", "/tags", params);
 }
-
 
 
 /**
@@ -101,8 +107,8 @@ export async function getTags(params: {}): Promise<Result<string[]>> {
  * @param size 返回数目（-1 全量返回）
  * @returns 博客数据
  */
-export async function getBlogs(params: { search?: string, tags?: string[], offset?: number, size?: number }): Promise<Result<Blog[]>> {
-    return await sendRequest("get", "/blogs", params);
+export async function getBlogs(params: { search?: string, tags?: string[], offset?: number, size?: number, all?:boolean}): Promise<Result<Blog[]>> {
+  return await sendRequest("get", "/blogs", params);
 }
 
 /**
@@ -111,8 +117,8 @@ export async function getBlogs(params: { search?: string, tags?: string[], offse
  * @param blog 新博客数据
  * @returns 返回修改结果
  */
-async function updateBlog(params: { id: string, blog: Blog }): Promise<Result> {
-    return { success: true, message: '', }
+export async function updateBlog(params: { id: string, blog: Blog }): Promise<Result<null>> {
+  return await sendRequest("post", "/blog", params);
 }
 
 /**
@@ -120,14 +126,8 @@ async function updateBlog(params: { id: string, blog: Blog }): Promise<Result> {
  * @param blog 博客数据
  * @returns 返回插入结果
  */
-async function addBlog(params: { blog: Blog }): Promise<Result<Blog>> {
-    const { blog } = params;
-
-    return {
-        success: true,
-        message: '',
-        data: { ...blog, id: 0 },
-    }
+export async function addBlog(params: { blog: Blog }): Promise<Result<Blog>> {
+  return sendRequest("put", "/blog", params);
 }
 
 /**
@@ -135,8 +135,8 @@ async function addBlog(params: { blog: Blog }): Promise<Result<Blog>> {
  * @param id 博客 ID
  * @returns 返回删除结果
  */
-async function deleteBlog(params: { id: string }): Promise<Result<Blog>> {
-    return sendRequest("delete", "/blogs/random", params);
+export async function deleteBlog(params: { id: string }): Promise<Result<Blog>> {
+  return sendRequest("delete", "/blog", params);
 }
 
 /**
@@ -146,15 +146,25 @@ async function deleteBlog(params: { id: string }): Promise<Result<Blog>> {
  * @returns 博客数据
  */
 export async function getRandomBlogs(params: { search?: string, tags?: string[], n?: number }): Promise<Result<Blog[]>> {
-    return await sendRequest("get", "/blogs/random", params);
+  return await sendRequest("get", "/blogs/random", params);
 }
 
+/**
+ * 测试接口
+ * @param  名称
+ * @returns 测试返回
+ */
+export async function getUserInfo(params: { token?: string }): Promise<Result<UserInfo>> {
+  return sendRequest("get", "/token", params); 
+}
 
 /**
  * 测试接口
  * @param name 名称
  * @returns 测试返回
  */
-export async function testApi(params: { name?: string }): Promise<Result<{ name: string }>> { return sendRequest("get", "/hello", params); }
+export async function testApi(params: { name?: string }): Promise<Result<{ name: string }>> {
+  return sendRequest("get", "/hello", params); 
+}
 
 

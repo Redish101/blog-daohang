@@ -1,10 +1,12 @@
-import { Spin, SpinProps } from 'antd';
+import React from "react";
+import { Spin, SpinProps } from "antd";
 
-import { Combine } from '@/utils';
+import { Combine } from "@/utils";
 
 export declare type LoadingProps = Combine<
   {
     loading?: boolean;
+    children?: React.ReactNode;
   },
   SpinProps
 >;
@@ -15,10 +17,11 @@ export declare type LoadingProps = Combine<
  */
 export function Loading(props: LoadingProps) {
   const { loading = true, style, ...restProps } = props;
+  
   return (
     <Spin
       spinning={loading}
-      style={{ width: '100%', ...style }}
+      style={{ width: "100%", ...style }}
       {...restProps}
     />
   );
