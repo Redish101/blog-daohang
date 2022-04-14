@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Input, Collapse, TableColumnsType, notification, } from 'antd';
+import { Table, Input, Collapse, TableColumnsType, notification } from 'antd';
 import { CheckOutlined, CloseOutlined, } from '@ant-design/icons';
 import { Card, Loading, Form, FormItemProps, Switch, Button } from '@/components/antd';
 import { getUserInfo, getTags, getBlogCount, getBlogs, updateBlog, deleteBlog } from '@/utils/api';
@@ -67,6 +67,9 @@ function Admin(props:{info:UserInfo}) {
   const cacheRef = React.useRef<{ [key: string]: Blog[] }>({});
   const [blogs, setBlogs] = React.useState<Blog[]>([]);
   const [loading, setLoading] = React.useState(false);
+
+  const [allowScripts, setAllowScripts] = React.useState(false);
+  const [allowSameOrigin, setAllowSameOrigin]= React.useState(false);
 
   const [params, setParams] = React.useState({
     search:"",
@@ -304,7 +307,7 @@ function Admin(props:{info:UserInfo}) {
         </Flex>
       ),
     },
-  ], [setEdit, form]);  
+  ], [setEdit, form, getPage]);  
     
   return (
     <Flex fullWidth direction="TB">
@@ -382,7 +385,22 @@ function Admin(props:{info:UserInfo}) {
         }
       }
       } />}
-      {!!edit && <iframe src={edit.url} style={{ width: "100%", height:"50vh" }} />}
+      {!!edit && <Flex direction="LR" mainAxis="flex-start" mainSize="middle" subSize="small">
+        <Flex direction="LR" mainAxis="flex-start" mainSize="small" subSize="small">
+          <b>允许运行脚本</b>
+          <span>（部分站点可能需要 JS 渲染页面）</span>
+          <Switch value={allowScripts} onChange={(value) => setAllowScripts(value)} />
+        </Flex>
+        <Flex direction="LR" mainAxis="flex-start" mainSize="small" subSize="small">
+          <b>允许同源</b>
+          <span>（部分站点可能需要获取 cookie 信息）</span>
+          <Switch value={allowSameOrigin} onChange={(value) => setAllowSameOrigin(value)} />
+        </Flex>
+      </Flex>}
+      {!!edit && <iframe src={edit.url} style={{ width: "100%", height: "50vh" }} sandbox={[
+        allowSameOrigin&&"allow-same-origin",
+        allowScripts&& "allow-scripts",
+      ].filter((item) => !!item).join(" ")}/>}
     </Flex>
   );
 }

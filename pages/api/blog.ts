@@ -3,8 +3,12 @@ import wrapper from "@/utils/backend/api";
 
 import DB from "@/utils/backend/db";
 
-export default wrapper<((_:{id?:string, blog?: Blog})=>Promise<Result<any>>)>(
+export default wrapper<((_:{token?:string, id?:string, blog?: Blog})=>Promise<Result<any>>)>(
   async (args, req) => {
+    if (!(await DB.getUser({ token: shouldString(args.token) })).success) {
+      return { "success": false, "message": "You do not has permission" };
+    }
+
     if (req.method === "PUT" && !!args.blog) {
       return await DB.addBlog({
         blog: args.blog as Blog 

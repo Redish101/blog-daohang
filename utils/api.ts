@@ -1,6 +1,7 @@
 import { shouldString } from ".";
 import { isDevelopment } from "./env";
 import { Result, Blog, JSONObject, UserInfo } from "./types";
+import Cookie from 'js-cookie';
 
 const backendURL = isDevelopment() ? "http://localhost:3000" : "";
 const apiPrefix = "/api/";
@@ -118,7 +119,9 @@ export async function getBlogs(params: { search?: string, tags?: string[], offse
  * @returns 返回修改结果
  */
 export async function updateBlog(params: { id: string, blog: Blog }): Promise<Result<null>> {
-  return await sendRequest("post", "/blog", params);
+  const token = Cookie.get("token");
+  
+  return await sendRequest("post", "/blog", { token, ...params });
 }
 
 /**
@@ -127,7 +130,9 @@ export async function updateBlog(params: { id: string, blog: Blog }): Promise<Re
  * @returns 返回插入结果
  */
 export async function addBlog(params: { blog: Blog }): Promise<Result<Blog>> {
-  return sendRequest("put", "/blog", params);
+  const token = Cookie.get("token");
+  
+  return sendRequest("put", "/blog", { token, ...params });
 }
 
 /**
@@ -136,7 +141,9 @@ export async function addBlog(params: { blog: Blog }): Promise<Result<Blog>> {
  * @returns 返回删除结果
  */
 export async function deleteBlog(params: { id: string }): Promise<Result<Blog>> {
-  return sendRequest("delete", "/blog", params);
+  const token = Cookie.get("token");
+
+  return sendRequest("delete", "/blog", { token, ...params });
 }
 
 /**
