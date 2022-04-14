@@ -1,5 +1,6 @@
+import React from 'react';
 import { GithubOutlined, HomeFilled, PlusCircleFilled, RocketFilled, SettingFilled } from "@ant-design/icons";
-import { ComponentProps } from "@/utils";
+import { classConcat, ComponentProps, Context } from "@/utils";
 import styles from "./layout.module.scss";
 import { Flex } from "@/components/flex";
 import { Card } from '@/components/antd';
@@ -9,15 +10,21 @@ export type LayoutProps = ComponentProps<{}>;
 
 export default function Layout(props: LayoutProps) {
   const { children } = props;
+  const ctx = React.useContext(Context);
   
   return (
     <>
       <Flex
-        className={styles.layout}
+        className={classConcat(
+          styles.layout,
+          ctx.layoutClassName,
+        )}
+        style={ctx.layoutStyle}
         fullWidth
         mainSize="large"
         subSize="large"
         subAxis="center"
+
       >
         {children}
         <Footer />
@@ -35,8 +42,8 @@ function Footer() {
   ];
   
   return (
-    <Flex className={styles.footer} direction="TB">
-      <Flex direction="LR" className={styles.menus}>
+    <Flex className={styles.footer} direction="TB" >
+      <Flex direction="LR" className={styles.menus} mainSize={0} subSize={0} mainAxis="space-around">
         {menus.map((menu) => <Link key={menu.path} href={menu.path} passHref>
           <a>
             <Card className={styles.menu}>

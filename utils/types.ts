@@ -76,3 +76,10 @@ export declare type UserInfo = {
     "updated_at": string;
     admin: boolean,
 }
+
+export declare type ContextType = {
+	setContext: (_: Partial<ContextType>) => void;
+	
+	layoutClassName: string
+	layoutStyle: CSSProperties,
+}

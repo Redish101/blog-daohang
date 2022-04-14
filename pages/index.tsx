@@ -41,7 +41,7 @@ const Home: NextPage<{
       <PageHeader
         title="中文博客列表导航项目"
         subTitle="尝试链接几乎所有的中文博客"
-        avatar={{ src: "/logo.jpg" }}
+        avatar={{ src: "/logo.png" }}
       />
       <Tabs<any>
         tabs={tabs}

@@ -79,7 +79,11 @@ async function getTags(params: {}): Promise<Result<string[]>> {
  */
 async function getBlogs(params: { search?: string, tags?: string[], offset?: number, size?: number, all?:boolean}): Promise<Result<Blog[]>> {
   return new Promise((resolve) => {
-    var { search, tags, offset, size, all=false } = params;
+    var { search, tags, offset, size, all = false } = params;
+    if (!!search) {
+      search = search.toLowerCase();
+    }
+    
     var ret = [...DB.blogs];
     if (!all) {
       ret=ret.filter((blog) => blog.enabled);
