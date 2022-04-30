@@ -23,7 +23,7 @@ LoginPage 返回跳转的登录页面，需要传入一个随机的 state 用于
 https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
 */
 function getLoginURL(state: string, signedUser: boolean, scope :string[]): string {
-  return `https://github.com/login/oauth/authorize?${makeQuery({
+  return `https://proxy.ohyee.cc/https://github.com/login/oauth/authorize?${makeQuery({
     "client_id": CLIENT_ID,
     "redirect_uri":REDIRECT_URI,
     "scope": scope.join(" "),
@@ -38,7 +38,7 @@ https://wiki.connect.qq.com/%E4%BD%BF%E7%94%A8authorization_code%E8%8E%B7%E5%8F%
 */
 async function auth(code:string, state :string):Promise<string> {
   const resp = await fetch(
-    `https://github.com/login/oauth/access_token?${makeQuery({
+    `https://proxy.ohyee.cc/https://github.com/login/oauth/access_token?${makeQuery({
       "client_id":CLIENT_ID,
       "client_secret": CLIENT_SECRET,
       "code": code,
@@ -61,14 +61,14 @@ async function auth(code:string, state :string):Promise<string> {
 获取用户信息
 */
 async function getInfo(token :string): Promise<UserInfo> {
-  const resp = await fetch("https://api.github.com/user", {
+  const resp = await fetch("https://proxy.ohyee.cc/https://api.github.com/user", {
     headers: {
       'Authorization':`token ${token}`
     }
   });
   
   const info = await resp.json(); 
-  const resp2 = await fetch(`https://api.github.com/orgs/zh-blogs/members/${info.name}`);  
+  const resp2 = await fetch(`https://proxy.ohyee.cc/https://api.github.com/orgs/zh-blogs/members/${info.name}`);  
     
   return { ...info, admin: resp2.status !== 404 };
 }

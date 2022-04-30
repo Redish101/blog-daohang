@@ -1,16 +1,14 @@
 import React from "react";
-// import { Head } from ''
 
 import { Typography } from 'antd';
 import { Flex } from "@/components/flex";
 import { getRandomBlogs } from "@/utils/api";
-import { Loading } from "@/components/antd";
 import { Blog, showNotification, Context, shouldString } from "@/utils";
 
 import styles from "./go.module.scss";
 import Router from "next/router";
 
-const DefaultWaitTimeInSecond = 10;
+const DefaultWaitTimeInSecond = 5;
 
 export default function Go() {
   const blogRef = React.useRef<Blog>();
@@ -71,7 +69,7 @@ export default function Go() {
   }, [setContext]);
   
   return (
-    <Flex direction="LR" mainAxis="center" subAxis="center">
+    <Flex direction="LR" mainAxis="center" subAxis="center" mainSize={0} subSize={0} >
       <div className={styles.sidebar}>
         <img src="/logo.png" title="logo" className={styles.img} alt="logo"/>
         <Typography.Paragraph strong className={styles.title}>
@@ -91,9 +89,9 @@ export default function Go() {
                     <Typography.Paragraph strong>
               自 博客导航 跳转至 <a href={blogRef.current.url}>{`${blogRef.current.name} (${blogRef.current.url})`}</a>
                     </Typography.Paragraph>
-                    <Typography.Paragraph strong>{ts} 秒后自动跳转</Typography.Paragraph>
+                    <Typography.Paragraph strong>{ts > 0 ? `${ts} 秒后自动跳转`: "正在跳转..."} </Typography.Paragraph>
                   </div>
-                ) : tsRef.current >= 0 ?(
+                ) : ts >= 0 ?(
                   <Typography.Paragraph strong>正在选择博客</Typography.Paragraph>
                 ): <Typography.Paragraph strong>有点问题，刷新下？</Typography.Paragraph>}
               </div>: <div key={item} className={styles.list} style={{ "backgroundColor": item }}>

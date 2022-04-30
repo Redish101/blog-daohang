@@ -30,9 +30,9 @@ export default function AddBlog() {
             {
               validator: async (_, value) => {
                 // 判断博客重复
-                const resp = await getBlogs({ search: getDomain(value) });
+                const resp = await getBlogs({ search: getDomain(value), status: 0 });
                 if (!!resp.success && !!resp.data) {
-                  const blogs = resp.data;
+                  const blogs = resp.data.blogs;
                   const matchBlogs = blogs.filter(
                     (blog) => getDomain(blog.url) === getDomain(value)
                   );

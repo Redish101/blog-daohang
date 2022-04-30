@@ -1,4 +1,4 @@
-import { Result, Blog, shouldNumber, shouldString, shouldArraySplit } from "@/utils";
+import { shouldNumber, shouldString, shouldArraySplit } from "@/utils";
 import { getBlogs } from "@/utils/api";
 import wrapper from "@/utils/backend/api";
 
@@ -12,11 +12,11 @@ export default wrapper<typeof getBlogs>(
         tags: shouldArraySplit(args.tags),
         offset: shouldNumber(args.offset, 0),
         size: shouldNumber(args.size, -1),
-        all: !!args.all,
+        status: shouldNumber(args.status, 1) as 0|1|-1,
       });
     } 
     
-    return { "success": false, "message": "Method not allowed" } as Result<Blog[]>;
+    return { "success": false, "message": "Method not allowed" } ;
         
   }
 );

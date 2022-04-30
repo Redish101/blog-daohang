@@ -11,18 +11,19 @@ import { Database } from "./database";
 const DB = new Database(path.join(path.resolve("."), "db", "data.json"));
 
 var userMap: {[token:string]: UserInfo} = {};
-
+var adminID:number[] = [];
 (async () => {
-  const { token } = JSON.parse((await fs.readFileSync(
+  const { token, admin } = JSON.parse((await fs.readFileSync(
     path.join(path.resolve("."), "db", "setting.json")
   )).toString("utf8"));
-  userMap[token] = { name:"admin" } as UserInfo; 
+  userMap[token] = { name: "admin" } as UserInfo; 
+  adminID = admin;
 })();
 
 
 async function getUser(params: { token: string }): Promise<Result<UserInfo>> {
-  const info = userMap[params.token];
-  console.log(Object.keys(userMap));
+  var info = userMap[params.token];
+  console.log(Object.keys(userMap).map((token) => `${userMap[token].name}|${token}|${userMap[token].admin}`).join(", "));
   if (!!info) {
     return Promise.resolve({
       success: true,
@@ -37,22 +38,29 @@ async function getUser(params: { token: string }): Promise<Result<UserInfo>> {
 }
 
 function setUser(params: { token: string, info: UserInfo }) {
+  var { token, info } = params;
+
+  if (!info.admin) {
+    info.admin = adminID.indexOf(info.id) !== -1;
+  }
+  
+  console.log(`set token ${token} for ${info.name}, admin ${info.admin}`);
   userMap[params.token] = params.info;
 }
 
-/**
- * 获取博客总数
- * @returns 博客总数
- */
-async function getBlogCount(params: { search?: string, tags?: string[], all?:boolean }): Promise<Result<number>> {
-  return new Promise(async (resolve) => {
-    const result = await getBlogs(params);
-    resolve({
-      success: true,
-      data: result.data?.length,
-    });
-  });
-}
+// /**
+//  * 获取博客总数
+//  * @returns 博客总数
+//  */
+// async function getBlogCount(params: { search?: string, tags?: string[], all?:boolean }): Promise<Result<number>> {
+//   return new Promise(async (resolve) => {
+//     const result = await getBlogs(params);
+//     resolve({
+//       success: true,
+//       data: result.data?.length,
+//     });
+//   });
+// }
 
 /**
  * 获取标签列表
@@ -77,16 +85,18 @@ async function getTags(params: {}): Promise<Result<string[]>> {
  * @param size 返回数目（-1 全量返回）
  * @returns 博客数据
  */
-async function getBlogs(params: { search?: string, tags?: string[], offset?: number, size?: number, all?:boolean}): Promise<Result<Blog[]>> {
+async function getBlogs(params: { search?: string, tags?: string[], offset?: number, size?: number, status?: 0 | 1 | -1 }): Promise<Result<{ total: number, blogs: Blog[] }>> {
   return new Promise((resolve) => {
-    var { search, tags, offset, size, all = false } = params;
+    var { search, tags, offset, size, status=1 } = params;
     if (!!search) {
       search = search.toLowerCase();
     }
     
     var ret = [...DB.blogs];
-    if (!all) {
+    if (status===1) {
       ret=ret.filter((blog) => blog.enabled);
+    } else if (status === -1) {
+      ret=ret.filter((blog) => !blog.enabled);
     }
     if (!!search) {
       ret = ret.filter((blog) => blog.name.toLowerCase().indexOf(search as string) !== -1 || blog.url.toLowerCase().indexOf(search as string) !== -1);
@@ -94,6 +104,10 @@ async function getBlogs(params: { search?: string, tags?: string[], offset?: num
     if (!!tags && tags.length > 0) {
       ret = ret.filter((blog) => tags?.filter((tag) => blog.tags.indexOf(tag) !== -1).length === tags?.length);
     }
+
+    // 符合的数目
+    const total = ret.length;
+
     if (typeof offset === "number") {
       ret = ret.slice(offset);
     };
@@ -102,7 +116,10 @@ async function getBlogs(params: { search?: string, tags?: string[], offset?: num
     }
     resolve({
       success: true,
-      data: ret
+      data: {
+        total,
+        blogs: ret,
+      }
     });
   });
 }
@@ -153,7 +170,7 @@ async function deleteBlog(params: { id: string }): Promise<Result<Blog>> {
 
 export default exports = {
   // db,
-  getBlogCount,
+  // getBlogCount,
   getBlogs,
   updateBlog,
   addBlog,

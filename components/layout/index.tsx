@@ -21,10 +21,9 @@ export default function Layout(props: LayoutProps) {
         )}
         style={ctx.layoutStyle}
         fullWidth
-        mainSize="large"
+        mainSize={0}
         subSize="large"
         subAxis="center"
-
       >
         {children}
         <Footer />
@@ -54,7 +53,6 @@ function Footer() {
             </Card>
           </a>
         </Link>)}
-       
       </Flex>
 
       <Flex.Item>© 中文博客导航 2022 - {new Date().getFullYear()}</Flex.Item>
@@ -65,7 +63,7 @@ function Footer() {
           zh-blogs/blog-daohang
         </a>
       </Flex.Item>
-      <a href="https://github.com/zh-blogs/blog-daohang">
+      {/* <a href="https://github.com/zh-blogs/blog-daohang">
         <Flex>
           <img
             src="https://img.shields.io/github/stars/zh-blogs/blog-daohang?style=flat-square"
@@ -80,7 +78,7 @@ function Footer() {
             alt="github watchers"
           />
         </Flex>
-      </a>
+      </a> */}
     </Flex>
   );
 }

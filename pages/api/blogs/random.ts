@@ -12,13 +12,13 @@ export default wrapper<typeof getRandomBlogs>(
         tags: shouldArraySplit(args.tags),
       });
       if (!!result.success && !!result.data) {
-        var arr = result.data;
+        var arr = result.data.blogs;
         arr.sort(() => (Math.random() > 0.5 ? 1 : -1));
         
         return { success: true, data: arr.slice(0, shouldNumber(args.n, 10)) };
       }
       
-      return result;
+      return { success:result.success, message:result.message };
     } 
     
     return { "success": false, "message": "Method not allowed" };

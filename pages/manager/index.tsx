@@ -1,9 +1,10 @@
 import React from 'react';
-import { Table, Input, Collapse, TableColumnsType, notification } from 'antd';
-import { CheckOutlined, CloseOutlined, } from '@ant-design/icons';
+import { Table, Input, Collapse, TableColumnsType, notification, Radio } from 'antd';
+import Link from 'next/link';
+import { CheckOutlined, CloseOutlined, GithubOutlined } from '@ant-design/icons';
 import { Card, Loading, Form, FormItemProps, Switch, Button } from '@/components/antd';
-import { getUserInfo, getTags, getBlogCount, getBlogs, updateBlog, deleteBlog } from '@/utils/api';
-import { UserInfo, Blog, showNotification, shouldString, shouldNumber, getDomain } from '@/utils';
+import { getUserInfo, getTags, getBlogs, updateBlog, deleteBlog } from '@/utils/api';
+import { UserInfo, Blog, showNotification, shouldString, shouldNumber, getDomain, Combine } from '@/utils';
 import { Tag }from'@/components/tag';
 import { Flex } from '@/components/flex';
 import styles from './index.module.scss';
@@ -30,14 +31,24 @@ export default function Manager() {
       setToken("");
     }
     
-      
     setLoading(false);
   }, [setToken]);
   
   return <Card shadow>
     <Loading loading={loading}>
       {!!token && !!info ?
-        <Admin info={info} />
+        !!info.admin ?
+          <Admin info={info} />
+          : <Flex direction="TB">
+            <p>Hi, {info.name}({info.id})。你不是项目组成员，请联系管理员添加权限。</p>
+            <Flex direction="TB">
+              <span>为管理员提供如下信息</span>
+              <span>name: {info.name}</span>
+              <span>id: {info.id}</span>
+              <span>email: {info.email}
+              </span>
+            </Flex>
+          </Flex>
         :<Login/>
       }
     </Loading>
@@ -46,17 +57,18 @@ export default function Manager() {
 
 
 function Login() {
-  return <Form
-    forms={[
-      { key: "token", label: "Token" },
-    ]}
-    onFinish={(values) => { 
-      const token = values.token;
-      Cookie.set("token", token);
+  return <Link href="/api/user/github_connect?from=/manager" passHref><Button icon={<GithubOutlined/>}>登录</Button></Link>;
+  // return <Form
+  //   forms={[
+  //     { key: "token", label: "Token" },
+  //   ]}
+  //   onFinish={(values) => { 
+  //     const token = values.token;
+  //     Cookie.set("token", token);
      
-      location.reload();
-    }}
-  />;
+  //     location.reload();
+  //   }}
+  // />;
 }
 
 
@@ -65,19 +77,22 @@ function Admin(props:{info:UserInfo}) {
   const { info } = props;
     
   const cacheRef = React.useRef<{ [key: string]: Blog[] }>({});
+
   const [blogs, setBlogs] = React.useState<Blog[]>([]);
+  const [totalBlogs, setTotalBlogs] = React.useState(0);
+
   const [loading, setLoading] = React.useState(false);
 
   const [allowScripts, setAllowScripts] = React.useState(false);
   const [allowSameOrigin, setAllowSameOrigin]= React.useState(false);
 
-  const [params, setParams] = React.useState({
+  const [params, setParams] = React.useState<Combine< Required<Parameters<typeof getBlogs>[0]>, {page:number}>>({
     search:"",
     tags: [] as string[],
     page : 1,
     offset: 0,
     size: 10,
-    all: true,
+    status: 0,
   });
 
   const [allTags, setAllTags] = React.useState<string[]>([]);
@@ -120,15 +135,6 @@ function Admin(props:{info:UserInfo}) {
   }, []);
 
 
-  const [totalBlogs, setTotalBlogs] = React.useState(0);
-  React.useEffect(() => {
-    getBlogCount(params).then((result) => {
-      if (showNotification(result) && !!result.data) {
-        setTotalBlogs(result.data);
-      }
-    });
-  }, [params, setTotalBlogs]);
-
   // query 改变时，更新列表
   const getPage = React.useCallback(() => {
     // 加载指定页码
@@ -141,10 +147,10 @@ function Admin(props:{info:UserInfo}) {
     getBlogs(params)
       .then((res) => {
         if (showNotification(res) && !!res.data) {
-          const _blogs = res.data;
-          setBlogs(_blogs);
+          setBlogs(res.data.blogs);
+          setTotalBlogs(res.data.total);
           // 更新缓存
-          cacheRef.current = { ...cacheRef.current, [key]: _blogs };
+          cacheRef.current = { ...cacheRef.current, [key]: res.data.blogs };
         }
       })
       .finally(() => {
@@ -175,9 +181,9 @@ function Admin(props:{info:UserInfo}) {
         {
           validator: async (_, value:string) => {
             // 判断博客重复
-            const resp = await getBlogs({ search: getDomain(value) });
+            const resp = await getBlogs({ search: getDomain(value), status: 0 });
             if (!!resp.success && !!resp.data) {
-              const blogs = resp.data;
+              const blogs = resp.data.blogs;
               const matchBlogs = blogs.filter(
                 (blog) => getDomain(blog.url) === getDomain(value) && !!edit&& blog.id !== edit.id
               );
@@ -311,7 +317,19 @@ function Admin(props:{info:UserInfo}) {
     
   return (
     <Flex fullWidth direction="TB">
-      <p>Hi, { info.name} !</p>
+      <p>Hi, {info.name} !</p>
+      <Radio.Group
+        onChange={(e) => {
+          if (!!e.target) {
+            setParams({ ...params, status: shouldNumber(e.target.value, 0) as (0 | 1 | -1) });
+          }
+        }}
+        value={params.status}
+      >
+        <Radio.Button value={0}>查看全部</Radio.Button>
+        <Radio.Button value={1}>展示</Radio.Button>
+        <Radio.Button value={-1}>隐藏</Radio.Button>
+      </Radio.Group>
       <Input
         placeholder="输入名称或网址筛选博客"
         defaultValue={shouldString(params.search)}
@@ -353,7 +371,6 @@ function Admin(props:{info:UserInfo}) {
           </Flex>
         </Collapse.Panel>
       </Collapse>
-
       <Table
         loading={loading}
         rowKey={(record) => `${record.id}-${record.url}`}

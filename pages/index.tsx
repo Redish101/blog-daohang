@@ -1,10 +1,11 @@
 import React from "react";
 import { NextPage } from "next";
 
-import { PageHeader, Button } from "antd";
+import { Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
-import { Tabs, Tab, Card } from "@/components/antd";
+import { Tabs, Tab, Card, } from "@/components/antd";
+import { Flex } from '@/components/flex';
 
 import { RandomBlogs } from "@/components/index/random";
 import { AboutTab } from "@/components/index/about";
@@ -38,24 +39,28 @@ const Home: NextPage<{
 
   return (
     <Card bordered={false} shadow>
-      <PageHeader
-        title="中文博客列表导航项目"
-        subTitle="尝试链接几乎所有的中文博客"
-        avatar={{ src: "/logo.png" }}
-      />
+      <Flex direction="LR" mainAxis="flex-start" subAxis="center" mainSize="large">
+        <Flex.Item style={{ textAlign:"center", margin:"auto" }}>
+          <img src="/logo.png" alt="logo" width={150} />
+        </Flex.Item>
+        <Flex.Item style={{ flex:"auto" }}>
+          <Flex direction="TB" fullWidth mainSize="large" >
+            <span style={{ fontSize:"2em", fontWeight:"bold" }}>中文博客列表导航项目</span>  
+            <Flex direction="LR" subSize="large">
+              <span>尝试链接几乎所有的中文博客</span>
+              <Link href="/manager/join" passHref>
+                <Button type="primary" icon={<PlusOutlined />}>
+                申请加入
+                </Button>
+              </Link></Flex>
+          </Flex>
+        </Flex.Item>
+      </Flex>
+       
       <Tabs<any>
         tabs={tabs}
         activeKey={shouldString(tab, "random")}
         onChange={(tab) => setQuery({ ...query, tab })}
-        tabBarExtraContent={{
-          right: (
-            <Link href="/manager/join" passHref>
-              <Button type="primary" icon={<PlusOutlined />}>
-                申请加入
-              </Button>
-            </Link>
-          ),
-        }}
       />
     </Card>
   );

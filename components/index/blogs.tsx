@@ -13,7 +13,7 @@ import {
 } from "@/utils";
 import { Tag } from "@/components/tag";
 import { Flex } from "@/components/flex";
-import { getBlogCount, getBlogs, getTags } from "@/utils/api";
+import { getBlogs, getTags } from "@/utils/api";
 
 const pageSize = 10;
 
@@ -108,15 +108,6 @@ export function Blogs() {
 
   const [totalBlogs, setTotalBlogs] = React.useState(0);
 
-  // query 改变时，更新页码
-  React.useEffect(() => {
-    const params = getParams();
-    getBlogCount(params).then((result) => {
-      if (showNotification(result) && !!result.data) {
-        setTotalBlogs(result.data);
-      }
-    });
-  }, [getParams, setTotalBlogs]);
 
   // query 改变时，更新列表
   const getPage = React.useCallback(() => {
@@ -131,10 +122,10 @@ export function Blogs() {
     getBlogs(params)
       .then((res) => {
         if (showNotification(res) && !!res.data) {
-          const _blogs = res.data;
-          setBlogs(_blogs);
+          setBlogs(res.data.blogs);
+          setTotalBlogs(res.data.total);
           // 更新缓存
-          cacheRef.current = { ...cacheRef.current, [key]: _blogs };
+          cacheRef.current = { ...cacheRef.current, [key]: res.data.blogs };
         }
       })
       .finally(() => {
