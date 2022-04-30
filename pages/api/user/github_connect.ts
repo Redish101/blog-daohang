@@ -23,7 +23,7 @@ LoginPage 返回跳转的登录页面，需要传入一个随机的 state 用于
 https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
 */
 function getLoginURL(state: string, signedUser: boolean, scope :string[]): string {
-  return `https://proxy.ohyee.cc/https://github.com/login/oauth/authorize?${makeQuery({
+  return `https://github.com/login/oauth/authorize?${makeQuery({
     "client_id": CLIENT_ID,
     "redirect_uri":REDIRECT_URI,
     "scope": scope.join(" "),
